@@ -45,7 +45,7 @@ class Predictor(BasePredictor):
         new_height = int(height * scaling_factor)
         resized_image = image.resize((new_width, new_height))
         cropped_image = self.crop_center(resized_image)
-        return cropped_image
+        return cropped_image, width, height
 
     def crop_center(self, pil_img):
         img_width, img_height = pil_img.size
@@ -93,10 +93,10 @@ class Predictor(BasePredictor):
         self.pipe.scheduler = SCHEDULERS[scheduler].from_config(self.pipe.scheduler.config)
         print("Using seed:", seed)
 
-        r_image = self.scale_down_image(image, 1280)
-        r_mask = self.scale_down_image(mask, 1280)
+        r_image, image_width, image_height  = self.scale_down_image(image, 1280)
+        r_mask, mask_width, mask_height = self.scale_down_image(mask, 1280)
         width, height = r_image.size
-        image = self.pipe(
+        output_image = self.pipe(
             prompt=prompt,
             image=r_image,
             mask_image=r_mask,
@@ -108,7 +108,8 @@ class Predictor(BasePredictor):
             negative_prompt=negative_prompt,
             generator=generator,
         ).images[0]
-
+        
+        output_image = output_image.resize((image_width, image_height), Image.LANCZOS)
         out_path = Path(f"/tmp/output.png")
-        image.save(out_path)
+        output_image.save(out_path)
         return  out_path
