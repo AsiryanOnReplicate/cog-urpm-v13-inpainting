@@ -84,13 +84,17 @@ class Predictor(BasePredictor):
             choices=SCHEDULERS.keys(),
             default="K_EULER_ANCESTRAL",
         ),
+        use_karras_sigmas: bool = Input(description="use karras sigmas or not", default=False),
         seed: int = Input(description="Leave blank to randomize",  default=None),
     ) -> Path:
         """Run a single prediction on the model"""
         if (seed == 0) or (seed == None):
             seed = int.from_bytes(os.urandom(2), byteorder='big')
         generator = torch.Generator('cuda').manual_seed(seed)
-        self.pipe.scheduler = SCHEDULERS[scheduler].from_config(self.pipe.scheduler.config)
+        self.pipe.scheduler = SCHEDULERS[scheduler].from_config(self.pipe.scheduler.config, use_karras_sigmas=use_karras_sigmas)
+        
+        print("Scheduler:", scheduler)
+        print("Using karras sigmas:", use_karras_sigmas)
         print("Using seed:", seed)
 
         r_image, image_width, image_height  = self.scale_down_image(image, 1280)
