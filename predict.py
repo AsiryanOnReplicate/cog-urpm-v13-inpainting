@@ -4,7 +4,7 @@ import os
 import math
 import torch
 from PIL import Image
-from diffusers import StableDiffusionInpaintPipeline, UNet2DConditionModel
+from diffusers import AutoPipelineForInpainting, StableDiffusionInpaintPipeline, UNet2DConditionModel
 from diffusers import (DDIMScheduler,
     DPMSolverMultistepScheduler,
     EulerAncestralDiscreteScheduler,
@@ -28,7 +28,7 @@ class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
         unet = UNet2DConditionModel.from_pretrained(MODEL_CACHE, subfolder="unet", in_channels=9, low_cpu_mem_usage=False, ignore_mismatched_sizes=True)
-        pipe = StableDiffusionInpaintPipeline.from_pretrained(
+        pipe = AutoPipelineForInpainting.from_pretrained(
             MODEL_CACHE, unet=unet, safety_checker = None
         )
         self.pipe = pipe.to("cuda")
