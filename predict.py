@@ -4,7 +4,7 @@ import os
 import math
 import torch
 from PIL import Image
-from diffusers import StableDiffusionInpaintPipeline, UNet2DConditionModel
+from diffusers import AutoPipelineForInpainting, StableDiffusionInpaintPipeline, UNet2DConditionModel
 from diffusers import (DDIMScheduler,
     DPMSolverMultistepScheduler,
     EulerAncestralDiscreteScheduler,
@@ -28,7 +28,7 @@ class Predictor(BasePredictor):
     def setup(self):
         """Load the model into memory to make running multiple predictions efficient"""
         unet = UNet2DConditionModel.from_pretrained(MODEL_CACHE, subfolder="unet", in_channels=9, low_cpu_mem_usage=False, ignore_mismatched_sizes=True)
-        pipe = StableDiffusionInpaintPipeline.from_pretrained(
+        pipe = AutoPipelineForInpainting.from_pretrained(
             MODEL_CACHE, unet=unet, safety_checker = None
         )
         self.pipe = pipe.to("cuda")
@@ -84,13 +84,17 @@ class Predictor(BasePredictor):
             choices=SCHEDULERS.keys(),
             default="K_EULER_ANCESTRAL",
         ),
+        use_karras_sigmas: bool = Input(description="use karras sigmas or not", default=False),
         seed: int = Input(description="Leave blank to randomize",  default=None),
     ) -> Path:
         """Run a single prediction on the model"""
         if (seed == 0) or (seed == None):
             seed = int.from_bytes(os.urandom(2), byteorder='big')
         generator = torch.Generator('cuda').manual_seed(seed)
-        self.pipe.scheduler = SCHEDULERS[scheduler].from_config(self.pipe.scheduler.config)
+        self.pipe.scheduler = SCHEDULERS[scheduler].from_config(self.pipe.scheduler.config, use_karras_sigmas=use_karras_sigmas)
+        
+        print("Scheduler:", scheduler)
+        print("Using karras sigmas:", use_karras_sigmas)
         print("Using seed:", seed)
 
         r_image, image_width, image_height  = self.scale_down_image(image, 1280)
