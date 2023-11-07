@@ -94,7 +94,7 @@ class Predictor(BasePredictor):
         generator = torch.Generator('cuda').manual_seed(seed)
         self.pipe.scheduler = SCHEDULERS[scheduler].from_config(self.pipe.scheduler.config, use_karras_sigmas=use_karras_sigmas)
         
-        print("Max length:", max_length)
+        print("Max image size:", max_image_size)
         print("Scheduler:", scheduler)
         print("Using karras sigmas:", use_karras_sigmas)
         print("Using seed:", seed)
