@@ -74,7 +74,7 @@ class Predictor(BasePredictor):
             description="Input Negative Prompt",
             default="(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), text, close up, cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck",
         ),
-        max_length: int = Input(description="image max length size", default=1280),
+        max_length: int = Input(description="image max length size (divisible by 8)", default=1280),
         strength: float = Input(description="strength/weight", ge=0, le=1, default=1.0),
         steps: int = Input(description=" num_inference_steps", ge=0, le=100, default=30),
         guidance_scale: float = Input(
