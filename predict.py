@@ -74,7 +74,7 @@ class Predictor(BasePredictor):
             description="Input Negative Prompt",
             default="(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), text, close up, cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck",
         ),
-        max_length: int = Input(description="image max length size (divisible by 8)", default=1280),
+        max_image_size: int = Input(description="max image size (divisible by 8)", default=1280),
         strength: float = Input(description="strength/weight", ge=0, le=1, default=1.0),
         steps: int = Input(description=" num_inference_steps", ge=0, le=100, default=30),
         guidance_scale: float = Input(
@@ -99,8 +99,8 @@ class Predictor(BasePredictor):
         print("Using karras sigmas:", use_karras_sigmas)
         print("Using seed:", seed)
 
-        r_image, image_width, image_height  = self.scale_down_image(image, max_length)
-        r_mask, mask_width, mask_height = self.scale_down_image(mask, max_length)
+        r_image, image_width, image_height  = self.scale_down_image(image, max_image_size)
+        r_mask, mask_width, mask_height = self.scale_down_image(mask, max_image_size)
         width, height = r_image.size
         output_image = self.pipe(
             prompt=prompt,
