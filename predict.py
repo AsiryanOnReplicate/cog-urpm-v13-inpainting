@@ -74,6 +74,7 @@ class Predictor(BasePredictor):
             description="Input Negative Prompt",
             default="(deformed iris, deformed pupils, semi-realistic, cgi, 3d, render, sketch, cartoon, drawing, anime:1.4), text, close up, cropped, out of frame, worst quality, low quality, jpeg artifacts, ugly, duplicate, morbid, mutilated, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, mutation, deformed, blurry, dehydrated, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, gross proportions, malformed limbs, missing arms, missing legs, extra arms, extra legs, fused fingers, too many fingers, long neck",
         ),
+        max_length: int = Input(description="image max length size", default=1280),
         strength: float = Input(description="strength/weight", ge=0, le=1, default=1.0),
         steps: int = Input(description=" num_inference_steps", ge=0, le=100, default=30),
         guidance_scale: float = Input(
@@ -85,7 +86,7 @@ class Predictor(BasePredictor):
             default="K_EULER_ANCESTRAL",
         ),
         use_karras_sigmas: bool = Input(description="use karras sigmas or not", default=False),
-        seed: int = Input(description="Leave blank to randomize",  default=None),
+        seed: int = Input(description="Leave blank to randomize", default=None),
     ) -> Path:
         """Run a single prediction on the model"""
         if (seed == 0) or (seed == None):
@@ -93,12 +94,13 @@ class Predictor(BasePredictor):
         generator = torch.Generator('cuda').manual_seed(seed)
         self.pipe.scheduler = SCHEDULERS[scheduler].from_config(self.pipe.scheduler.config, use_karras_sigmas=use_karras_sigmas)
         
+        print("Max length:", max_length)
         print("Scheduler:", scheduler)
         print("Using karras sigmas:", use_karras_sigmas)
         print("Using seed:", seed)
 
-        r_image, image_width, image_height  = self.scale_down_image(image, 1280)
-        r_mask, mask_width, mask_height = self.scale_down_image(mask, 1280)
+        r_image, image_width, image_height  = self.scale_down_image(image, max_length)
+        r_mask, mask_width, mask_height = self.scale_down_image(mask, max_length)
         width, height = r_image.size
         output_image = self.pipe(
             prompt=prompt,
